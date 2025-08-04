@@ -1,4 +1,6 @@
 export const registerUser = (req,res)=>{
+
+    
     res.send("this is register route")
 }
 export const loginUser = (req,res)=>{

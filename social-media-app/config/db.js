@@ -12,16 +12,4 @@ const sequelize = new Sequelize(process.env.DB_NAME,process.env.DB_USER,process.
     },
     logging:false
 })
-// const sequelize = new Sequelize("social-media-app","root","",{
-//     dialect:"mysql",
-//     port:3306,
-//     host:"localhost",
-//     pool:{
-//         min:0,
-//         max:5,
-//         acquire:30000,
-//         idle:10000,
-//     },
-//     logging:false
-// })
 export default sequelize;
