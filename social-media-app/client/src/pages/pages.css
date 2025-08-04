@@ -1,0 +1,55 @@
+.terms-condition-section p,
+.privacy-policy-section p {
+    margin-bottom: 10px;
+    line-height: 20px;
+    font-size: 16px;
+}
+
+.terms-condition-section .list-upper-alpha {
+    list-style-type: upper-alpha;
+    padding-left: 1.5rem;
+}
+
+.privacy-policy-section .list-number {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+}
+
+/* Make only the top-level li's direct text bold */
+.terms-condition-section .list-upper-alpha>li,
+.privacy-policy-section .list-number>li {
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.terms-condition-section .list-upper-alpha>li ol,
+.privacy-policy-section .list-number>li ol {
+    margin-top: 5px;
+    margin-left: 15px !important;
+}
+
+.terms-condition-section .list-upper-alpha>li ol,
+.terms-condition-section .list-upper-alpha>li ol li {
+    font-weight: normal;
+    /* Reset nested list text to normal */
+}
+
+.terms-condition-section .list-number>li ol,
+.terms-condition-section .list-number>li ol li {
+    font-weight: normal;
+    /* Reset nested list text to normal */
+}
+
+.terms-condition-section li {
+    margin-bottom: 5px;
+}
+.not-found-page{
+    height: calc(100vh - 118px);
+    overflow-y: auto;
+}
+@media screen and (max-width:767px) {
+    .not-found-page{        
+        height: 100%;
+    }
+    
+}
