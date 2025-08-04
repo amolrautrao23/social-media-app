@@ -1,5 +1,5 @@
-import { DataTypes } from "sequelize";
-import sequellize from "./"
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db.js';
 
 const User = sequelize.define('User', {
     id: {
@@ -11,6 +11,10 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+    },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     email: {
         type: DataTypes.STRING,
@@ -24,13 +28,23 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    coverPic: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     profilePic: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    city: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    website: {
         type: DataTypes.STRING,
         allowNull: true,
     },
 }, {
     timestamps: true,
-    tableName: 'users',
 });
-
-module.exports = User;
+export default User;
