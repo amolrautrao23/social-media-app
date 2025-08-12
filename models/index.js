@@ -1,27 +1,28 @@
-import User from './user.model.js'
-import Post from './post.model.js'
-import Comment from './comment.model.js'
-import Story from './story.model.js'
-import Relationship from './relationship.model.js'
+import User from './user.model.js';
+import Post from './post.model.js';
+import Comment from './comment.model.js';
+import Story from './story.model.js';
+import Relationship from './relationship.model.js';
 
-// User-Post: One user can have many posts
-User.hasMany(Post, { foreignKey: 'postId', onDelete: 'CASCADE' });
+// 1️⃣ User ↔ Post
+User.hasMany(Post, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Post.belongsTo(User, { foreignKey: 'userId', allowNull: false });
 
-// Post-Comment: One post can have many comments
+// 2️⃣ Post ↔ Comment
 Post.hasMany(Comment, { foreignKey: 'postId', onDelete: 'CASCADE' });
 Comment.belongsTo(Post, { foreignKey: 'postId', allowNull: false });
 
-// User-Comment: One user can make many comments
-User.hasMany(Comment, { foreignKey: 'commentId', onDelete: 'CASCADE' });
+// 3️⃣ User ↔ Comment
+User.hasMany(Comment, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Comment.belongsTo(User, { foreignKey: 'userId', allowNull: false });
 
-// User-Story: One user can have many stories
-User.hasMany(Story, { foreignKey: 'storyId', onDelete: 'CASCADE' });
+// 4️⃣ User ↔ Story
+User.hasMany(Story, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Story.belongsTo(User, { foreignKey: 'userId', allowNull: false });
 
-// Relationship: Follows/friends between users
-User.hasMany(Relationship, { foreignKey: 'followerId', as: 'Followers' });
-User.hasMany(Relationship, { foreignKey: 'followingId', as: 'Following' });
+// 5️⃣ Self-referencing Relationship (Followers / Following)
+User.hasMany(Relationship, { foreignKey: 'followerId', as: 'FollowingList' });
+User.hasMany(Relationship, { foreignKey: 'followingId', as: 'FollowerList' });
+
 Relationship.belongsTo(User, { foreignKey: 'followerId', as: 'Follower' });
 Relationship.belongsTo(User, { foreignKey: 'followingId', as: 'Following' });

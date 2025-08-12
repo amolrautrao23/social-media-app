@@ -7,7 +7,6 @@ export const sendResponse = (res, status, message, data = {}, success = true) =>
 };
 
 export const sendError = (res, err, status, message) => {
-    console.error(err?.stack || err);
     return res.status(status || 500).json({
         success: false,
         message: message || err?.message || "Something went wrong",

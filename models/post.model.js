@@ -7,8 +7,11 @@ const Post = sequelize.define("Post",{
             primaryKey: true,
             autoIncrement: true,
         },
-        description: {
+        title: {
             type: DataTypes.STRING,
+        },
+        description: {
+            type: DataTypes.TEXT,
         },
         img: {
             type: DataTypes.STRING,

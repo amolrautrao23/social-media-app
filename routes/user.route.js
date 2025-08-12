@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {loginUser, registerUser,logoutUser} from "../controllers/user.js"
 import { createUploadMiddleware } from "../middlewares/upload.js";
+import verifyToken from "../middlewares/verifyToken.js";
 const router = Router();
 
 router.post('/register',createUploadMiddleware([
@@ -8,5 +9,5 @@ router.post('/register',createUploadMiddleware([
     { name: "coverPic",prefix:"cov", maxCount: 1, destination: "uploads/users/coverPics" }
   ]),registerUser)
 router.post('/login',loginUser)
-router.get('/logout',logoutUser)
+router.get('/logout',verifyToken,logoutUser)
 export default router
