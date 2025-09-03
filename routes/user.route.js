@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {loginUser, registerUser,logoutUser} from "../controllers/user.js"
+import { getMe } from "../controllers/user.js";
 import { createUploadMiddleware } from "../middlewares/upload.js";
 import verifyToken from "../middlewares/verifyToken.js";
 const router = Router();
@@ -10,4 +11,7 @@ router.post('/register',createUploadMiddleware([
   ]),registerUser)
 router.post('/login',loginUser)
 router.get('/logout',verifyToken,logoutUser)
+
+// Get current user info if authenticated
+router.get('/me', verifyToken, getMe);
 export default router

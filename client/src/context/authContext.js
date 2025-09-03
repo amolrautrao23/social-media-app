@@ -1,29 +1,37 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext } from "react";
+import axiosInstance from '../utils/axiosConfig';
+import { useQuery } from '@tanstack/react-query';
 
 export const AuthContext = createContext();
 
-export const AuthContextProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(
-    JSON.parse(localStorage.getItem("user")) || null
-  );
+export function AuthContextProvider({ children }) {
+  // React Query: fetch current user info using cookie
+  const { data: currentUser, isLoading, isError, refetch } = useQuery({
+  queryKey: ['currentUser'],
+  queryFn: async () => {
+    return await axiosInstance.get('/users/me');
+  },
+  staleTime: 0,
+  refetchOnWindowFocus: false,
+  retry: false, // only one error shown
+});
 
-  const login = () => {
-    //TO DO
-    setCurrentUser({
-      id: 1,
-      name: "John Doe",
-      profilePic:
-        "https://images.pexels.com/photos/3228727/pexels-photo-3228727.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    });
+  // Call this after successful login API (response should have user info)
+  const login = async (userData) => {
+    refetch(); // Optionally refetch user info
   };
 
-  useEffect(() => {
-    localStorage.setItem("user", JSON.stringify(currentUser));
-  }, [currentUser]);
+  // Call this to logout (and optionally call backend logout API)
+  const logout = async () => {
+    try {
+      await axiosInstance.post('/users/logout'); // Adjust endpoint as needed
+    } catch (err) {}
+    refetch(); // Optionally refetch user info
+  };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login }}>
+    <AuthContext.Provider value={{ currentUser, login, logout, isLoading, isError }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}

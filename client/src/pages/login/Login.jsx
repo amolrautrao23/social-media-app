@@ -1,15 +1,61 @@
-import { useContext } from "react";
-import { Link } from "react-router-dom";
-import { AuthContext } from "../../context/authContext";
+import React, { useEffect, useState } from "react";
+import { useMutation } from '@tanstack/react-query';
+import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
+import axiosInstance from '../../utils/axiosConfig';
+import { showToast } from '../../utils/Toast';
+
+const loginUser = async (data) => {
+  return await axiosInstance.post('/users/login', data);
+  
+};
 
 const Login = () => {
-  const { login } = useContext(AuthContext);
+  const [data, setData] = useState({
+    username: "",
+    password: ""
+  });
+  const navigate = useNavigate();
 
-  const handleLogin = () => {
-    login();
+  const mutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (res) => {
+      showToast(res?.message , 'success');
+      console.log("testing");
+      navigate('/');
+    },
+    onError: (error) => {
+      showToast(error?.message || 'Login failed ❌', 'error');
+    },
+  });
+  useEffect(() => {
+  if (mutation.isSuccess) {
+    navigate('/');
+  }
+}, [mutation.isSuccess, navigate]);
+
+  const handleChange = e => {
+    setData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const validate = () => {
+    if (!data.username.trim()) {
+      showToast('Username is required', 'error');
+      return false;
+    }
+    if (!data.password) {
+      showToast('Password is required', 'error');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    if (!validate()) return;
+    mutation.mutateAsync(data)
+    // console.log(data)
+  };
   return (
     <div className="login">
       <div className="card">
@@ -27,10 +73,12 @@ const Login = () => {
         </div>
         <div className="right">
           <h1>Login</h1>
-          <form>
-            <input type="text" placeholder="Username" />
-            <input type="password" placeholder="Password" />
-            <button onClick={handleLogin}>Login</button>
+          <form className="loginForm" onSubmit={handleSubmit}>
+            <input type="text" name="username" placeholder="Username" value={data.username} onChange={handleChange} />
+            <input type="password" name="password" placeholder="Password" value={data.password} onChange={handleChange}/>
+            <button type="submit" disabled={mutation.isLoading}>
+              {mutation.isLoading ? 'Logging in...' : 'Login'}
+            </button>
           </form>
         </div>
       </div>

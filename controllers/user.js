@@ -48,13 +48,13 @@ export const registerUser = async (req, res) => {
 };
 export const loginUser = async (req, res) => {
   try {
-    const { email, username, password } = req.body;
+    const { username, password } = req.body;
     //check validation
-    if (!email || !username || !password) {
-      return sendError(res, null, 400, 'All fields are required!');
-    }
+    // if (!email || !username || !password) {
+    //   return sendError(res, null, 400, 'All fields are required!');
+    // }
     //check user is exist or not
-    const existingUser = await User.findOne({ where: { [Op.or]: [{ email }, { username }] } });
+    const existingUser = await User.findOne({ where: { [Op.or]: [{ email:username }, { username }] } });
     if (!existingUser) return sendError(res, null, 404, 'User not found with is email or username!');
 
     //if exist check password is correct
@@ -70,7 +70,7 @@ export const loginUser = async (req, res) => {
       sameSite: 'strict',
       maxAge: 60 * 60 * 1000,
     });
-    return sendResponse(res, 200, 'Login successful', {
+    return sendResponse(res, 200, `Welcome back, ${existingUser.name}`, {
       token,
       user: {
         id: existingUser.id,
@@ -90,4 +90,22 @@ export const logoutUser = (req, res) => {
     sameSite: 'strict',
   });
   return sendResponse(res, 200, 'Logged out successfully');
+};
+// Get current authenticated user info
+export const getMe = async (req, res) => {
+  try {
+    // req.user should be set by verifyToken middleware
+    const userId = req.user?.id;
+    if (!userId) return sendError(res, null, 401, 'Not authenticated');
+
+    const user = await User.findByPk(userId, {
+      attributes: { exclude: ['password'] }
+    });
+    if (!user) return sendError(res, null, 404, 'User not found');
+
+    return sendResponse(res, 200, 'User info fetched', user);
+  } catch (err) {
+    console.error(err);
+    return sendError(res, err, 500, 'Something went wrong!');
+  }
 };

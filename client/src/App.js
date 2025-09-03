@@ -1,6 +1,6 @@
 import Login from './pages/login/Login';
 import Register from './pages/register/Register';
-import { createBrowserRouter, RouterProvider, Route, Outlet, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import Navbar from './components/navbar/Navbar';
 import LeftBar from './components/leftBar/LeftBar';
 import RightBar from './components/rightBar/RightBar';
@@ -9,71 +9,83 @@ import Profile from './pages/profile/Profile';
 import './style.scss';
 import { useContext } from 'react';
 import { DarkModeContext } from './context/darkModeContext';
-import { AuthContext } from './context/authContext';
+import { AuthContext, AuthContextProvider } from './context/authContext';
 import { ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-function App() {
-  const { currentUser } = useContext(AuthContext);
-
+function AppRoutes() {
+  const { currentUser, isLoading } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext);
-  const queryClient = new QueryClient();
-  const Layout = () => {
-    return (
-      <div className={`theme-${darkMode ? 'dark' : 'light'}`}>
-        <Navbar />
-        <div style={{ display: 'flex' }}>
-          <LeftBar />
-          <div style={{ flex: 6 }}>
-            <Outlet />
-          </div>
-          <RightBar />
+
+  const Layout = () => (
+    <div className={`theme-${darkMode ? 'dark' : 'light'}`}>
+      <Navbar />
+      <div style={{ display: 'flex' }}>
+        <LeftBar />
+        <div style={{ flex: 6 }}>
+          <Outlet />
         </div>
+        <RightBar />
       </div>
-    );
-  };
+    </div>
+  );
 
+  // Only allow access to children if logged in
   const ProtectedRoute = ({ children }) => {
-    if (!currentUser) {
-      return <Navigate to="/login" />;
+    if (isLoading) {
+      return <div style={{textAlign: 'center', marginTop: '2rem'}}>Loading...</div>;
     }
-
+    if (!currentUser) {
+      return <Navigate to="/login" replace />;
+    }
     return children;
   };
 
-  const router = createBrowserRouter([
-    {
-      path: '/',
-      element: (
-        <ProtectedRoute>
-          <Layout />
-        </ProtectedRoute>
-      ),
-      children: [
-        {
-          path: '/',
-          element: <Home />,
-        },
-        {
-          path: '/profile/:id',
-          element: <Profile />,
-        },
-      ],
-    },
-    {
-      path: '/login',
-      element: <Login />,
-    },
-    {
-      path: '/register',
-      element: <Register />,
-    },
-  ]);
+  // Only allow access to children if NOT logged in
+  const PublicRoute = ({ children }) => {
+    if (isLoading) {
+      return <div style={{textAlign: 'center', marginTop: '2rem'}}>Loading...</div>;
+    }
+    if (currentUser) {
+      return <Navigate to="/" replace />;
+    }
+    return children;
+  };
 
   return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Home />} />
+          <Route path="profile/:id" element={<Profile />} />
+        </Route>
+        <Route path="/login" element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } />
+        <Route path="/register" element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        } />
+      </Routes>
+      <ToastContainer position="top-right" autoClose={3000} pauseOnFocusLoss={false}  />
+    </BrowserRouter>
+  );
+}
+
+function App() {
+  const queryClient = new QueryClient();
+  return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-      <ToastContainer position="top-right" autoClose={3000} />
+      <AuthContextProvider>
+        <AppRoutes />
+      </AuthContextProvider>
     </QueryClientProvider>
   );
 }
