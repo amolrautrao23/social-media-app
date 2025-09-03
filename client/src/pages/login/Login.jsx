@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useMutation } from '@tanstack/react-query';
 import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
 import axiosInstance from '../../utils/axiosConfig';
 import { showToast } from '../../utils/Toast';
+import { AuthContext } from "../../context/authContext";
 
 const loginUser = async (data) => {
   return await axiosInstance.post('/users/login', data);
@@ -11,6 +12,7 @@ const loginUser = async (data) => {
 };
 
 const Login = () => {
+  const { currentUser, isLoading } = useContext(AuthContext);
   const [data, setData] = useState({
     username: "",
     password: ""
@@ -20,19 +22,16 @@ const Login = () => {
   const mutation = useMutation({
     mutationFn: loginUser,
     onSuccess: (res) => {
+      navigate('/');
+      // window.location.reload(); //temp solution
+
       showToast(res?.message , 'success');
       console.log("testing");
-      navigate('/');
     },
     onError: (error) => {
       showToast(error?.message || 'Login failed ❌', 'error');
     },
   });
-  useEffect(() => {
-  if (mutation.isSuccess) {
-    navigate('/');
-  }
-}, [mutation.isSuccess, navigate]);
 
   const handleChange = e => {
     setData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -79,7 +78,7 @@ const Login = () => {
             <button type="submit" disabled={mutation.isLoading}>
               {mutation.isLoading ? 'Logging in...' : 'Login'}
             </button>
-          </form>
+            </form>
         </div>
       </div>
     </div>
