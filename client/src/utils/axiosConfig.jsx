@@ -14,7 +14,6 @@ const axiosInstance = axios.create({
 // 🔹 Request Interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // 🔄 Auto set Content-Type dynamically
     if (config.data instanceof FormData) {
       config.headers['Content-Type'] = 'multipart/form-data';
     } else if (config.data && typeof config.data === 'object' && !(config.data instanceof Blob)) {

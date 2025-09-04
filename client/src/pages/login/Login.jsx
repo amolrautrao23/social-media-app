@@ -1,18 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useMutation } from '@tanstack/react-query';
 import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
-import axiosInstance from '../../utils/axiosConfig';
 import { showToast } from '../../utils/Toast';
 import { AuthContext } from "../../context/authContext";
 
-const loginUser = async (data) => {
-  return await axiosInstance.post('/users/login', data);
-  
-};
+
 
 const Login = () => {
-  const { currentUser, isLoading } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const [data, setData] = useState({
     username: "",
     password: ""
@@ -20,14 +16,14 @@ const Login = () => {
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: loginUser,
-    onSuccess: (res) => {
-      navigate('/');
-      // window.location.reload(); //temp solution
-
-      showToast(res?.message , 'success');
-      console.log("testing");
-    },
+  mutationFn: login,
+  onSuccess: (res) => {
+    navigate('/');
+    showToast(res?.message , 'success');
+  },
+  onError: (error) => {
+    showToast(error?.message || 'Login failed ❌', 'error');
+  },
     onError: (error) => {
       showToast(error?.message || 'Login failed ❌', 'error');
     },
@@ -53,7 +49,6 @@ const Login = () => {
     e.preventDefault();
     if (!validate()) return;
     mutation.mutateAsync(data)
-    // console.log(data)
   };
   return (
     <div className="login">

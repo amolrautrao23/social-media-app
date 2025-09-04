@@ -5,7 +5,7 @@ import { AuthContext } from "../../context/authContext"
 const Stories = () => {
 
   const {currentUser} = useContext(AuthContext)
-
+const BASE_URL = process.env.REACT_APP_BASE_URL;
   //TEMPORARY
   const stories = [
     {
@@ -33,7 +33,7 @@ const Stories = () => {
   return (
     <div className="stories">
       <div className="story">
-          <img src={currentUser.profilePic} alt="" />
+          <img src={`${BASE_URL}${currentUser.user.profilePic}`} alt="" />
           <span>{currentUser.name}</span>
           <button>+</button>
         </div>

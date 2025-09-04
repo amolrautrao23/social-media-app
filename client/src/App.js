@@ -7,7 +7,7 @@ import RightBar from './components/rightBar/RightBar';
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
 import './style.scss';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { DarkModeContext } from './context/darkModeContext';
 import { AuthContext, AuthContextProvider } from './context/authContext';
 import { ToastContainer } from 'react-toastify';
@@ -17,6 +17,8 @@ function AppRoutes() {
   const { currentUser, isLoading } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext);
 
+  useEffect(() => {
+  }, [currentUser]);
   const Layout = () => (
     <div className={`theme-${darkMode ? 'dark' : 'light'}`}>
       <Navbar />
