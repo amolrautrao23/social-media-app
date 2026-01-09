@@ -35,7 +35,7 @@ sequelize
     console.error('Error synchronizing database:', error);
   });
 
-app.use('/', routes);
+app.use('/api', routes);
 // Get port from .env or use default 6000
 const PORT = process.env.PORT || 6000;
 

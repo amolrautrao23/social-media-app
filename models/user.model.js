@@ -40,9 +40,9 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    website: {
-        type: DataTypes.STRING,
-        allowNull: true,
+    role: {
+        type: DataTypes.INTEGER,
+        defaultValue:0, // 0: user, 1: Super Admin, 2: Admin, 3: Editor
     },
 }, {
     timestamps: true,

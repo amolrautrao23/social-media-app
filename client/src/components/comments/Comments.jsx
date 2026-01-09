@@ -4,6 +4,7 @@ import { AuthContext } from "../../context/authContext";
 
 const Comments = () => {
   const { currentUser } = useContext(AuthContext);
+    const BASE_URL = process.env.REACT_APP_BASE_URL;
   //Temporary
   const comments = [
     {
@@ -26,7 +27,7 @@ const Comments = () => {
   return (
     <div className="comments">
       <div className="write">
-        <img src={currentUser.profilePic} alt="" />
+        <img src={`${BASE_URL}${currentUser.user.profilePic}`} alt="" />
         <input type="text" placeholder="write a comment" />
         <button>Send</button>
       </div>

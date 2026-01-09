@@ -55,17 +55,17 @@ export const deletePost = async (req, res) => {
     console.log("deletePost", postId);
     const post = await Post.findByPk(postId);
     if (!post) {
-      return sendError(res, null, 404, "Post not found");
+      return sendError(res, 404, "Post not found");
     }
     // Optional: Check if the user is authorized to delete the post
     if (post.userId !== req.user.id) {
-      return sendError(res, null, 403, "You are not authorized to delete this post");
+      return sendError(res, 403, "You are not authorized to delete this post");
     }
     await post.destroy();
     return sendResponse(res, 200, "Post deleted successfully", null);
     } catch (error) {
     console.error("Error deleting post:", error);
-    return sendError(res, null, 500, error.message || "Failed to delete post");
+    return sendError(res, 500, error.message || "Failed to delete post");
   }
 };
 

@@ -3,7 +3,6 @@ import User from '../models/user.model.js';
 import { sendError, sendResponse } from '../utils/handleResponse.js';
 import bcrypt from 'bcrypt';
 import { deleteUploadedFiles } from '../middlewares/upload.js';
-import path from 'path';
 import jwt from 'jsonwebtoken';
 import { getRelativePath } from '../utils/helper.js';
 export const registerUser = async (req, res) => {
@@ -20,7 +19,7 @@ export const registerUser = async (req, res) => {
     //check all required fields
     if (!name || !username || !email || !password) {
       deleteUploadedFiles(req.files);
-      return sendError(res, null, 401, 'All fields are required!');
+      return sendError(res, 401, 'All fields are required!');
     }
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -43,32 +42,28 @@ export const registerUser = async (req, res) => {
   } catch (err) {
     console.error(err);
     deleteUploadedFiles(req.files);
-    sendError(res, null, 500, 'Something went wrong!');
+    sendError(res, 500, 'Something went wrong!');
   }
 };
 export const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
-    //check validation
-    // if (!email || !username || !password) {
-    //   return sendError(res, null, 400, 'All fields are required!');
-    // }
     //check user is exist or not
     const existingUser = await User.findOne({ where: { [Op.or]: [{ email:username }, { username }] } });
-    if (!existingUser) return sendError(res, null, 404, 'User not found with is email or username!');
+    if (!existingUser) return sendError(res, 404, 'User not found with is email or username!');
 
     //if exist check password is correct
     const isPasswordCorrect = await bcrypt.compare(password, existingUser.password);
 
-    if (!isPasswordCorrect) return sendError(res, null, 401, 'Incorrect Password');
+    if (!isPasswordCorrect) return sendError(res, 401, 'Incorrect Password');
 
     //set coockies if all ok and send response
-    const token = jwt.sign({ id: existingUser.id, name: existingUser.name }, process.env.JWT_SECRET_KEY, { expiresIn: 60 * 1000 });
+    const token = jwt.sign({ id: existingUser.id, name: existingUser.name, role: existingUser.role }, process.env.JWT_SECRET_KEY, { expiresIn: 60 * 1000 });
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 60 * 60 * 1000,
+      maxAge: 60 * 60 * 1000, // 1 hour
     });
     return sendResponse(res, 200, `Welcome back, ${existingUser.name}`, {
       token,
@@ -83,7 +78,7 @@ export const loginUser = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return sendError(res, error, 500, 'Something went wrong!');
+    return sendError(res, 500, error.message);
   }
 };
 export const logoutUser = (req, res) => {
@@ -99,16 +94,16 @@ export const getMe = async (req, res) => {
   try {
     // req.user should be set by verifyToken middleware
     const userId = req.user?.id;
-    if (!userId) return sendError(res, null, 401, 'Not authenticated');
+    if (!userId) return sendError(res, 401, 'Not authenticated');
 
     const user = await User.findByPk(userId, {
       attributes: { exclude: ['password'] }
     });
-    if (!user) return sendError(res, null, 404, 'User not found');
+    if (!user) return sendError(res, 404, 'User not found');
 
     return sendResponse(res, 200, 'User info fetched', user);
   } catch (err) {
     console.error(err);
-    return sendError(res, err, 500, 'Something went wrong!');
+    return sendError(res, 500, err?.message);
   }
 };
