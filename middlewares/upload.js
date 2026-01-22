@@ -1,7 +1,6 @@
 import multer from "multer";
-import { extname, join, dirname } from "path";
+import { extname, join, } from "path";
 import { mkdirSync, existsSync, unlink } from "fs";
-import { log } from "console";
 
 const { diskStorage } = multer;
 
@@ -65,11 +64,18 @@ export function createUploadMiddleware(config) {
 // Delete uploaded files (for validation fail or error)
 export function deleteUploadedFiles(files) {
   if (!files) return;
-  Object.values(files).forEach(fileArray => {
+
+  Object.values(files).forEach(fileValue => {
+    // Ensure always array
+    const fileArray = Array.isArray(fileValue) ? fileValue : [fileValue];
+
     fileArray.forEach(file => {
-      unlink(file.path, err => {
-        if (err) console.error("Failed to delete file:", file.path, err);
-      });
+      if (file?.path) {
+        unlink(file.path, err => {
+          if (err) console.error("Failed to delete file:", file.path, err);
+        });
+      }
     });
   });
 }
+

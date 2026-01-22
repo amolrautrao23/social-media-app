@@ -12,7 +12,7 @@ export const registerUser = async (req, res) => {
     const user = await User.findOne({ where: { [Op.or]: [{ email }, { username }] } });
     if (user) {
       deleteUploadedFiles(req.files);
-      return sendError(res, null, 401, 'User already exists!');
+      return sendError(res, 401, 'User already exists!');
     }
     const profilePicPath = getRelativePath(req.files?.profilePic?.[0]?.path) || null;
     const coverPicPath = getRelativePath(req.files?.coverPic?.[0]?.path) || null;
