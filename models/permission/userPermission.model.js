@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../config/db.js";
 import User from "../user.model.js";
-import Permission from "./permission/Permission.model.js";
+import Permission from "./Permission.model.js";
 
 const UserPermission = sequelize.define(
   "UserPermission",

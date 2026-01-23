@@ -11,7 +11,7 @@ import categoryRoute from "./category.route.js"
 const routes =Router();
 routes.use("/users",userRoute);
 routes.use(verifyToken)
-routes.use("/likes",likeRoute);
+routes.use(likeRoute);
 routes.use("/posts",postRoute);
 routes.use("/story",storyRoute);
 routes.use("/comments",commentRoute);

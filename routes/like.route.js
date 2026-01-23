@@ -1,8 +1,7 @@
 import { Router } from "express";
+import { toggleLike } from "../controllers/like.js";
 
 const router = Router();
 
-router.get('/test', (req, res) => {
-    res.send("This is like test route")
-})
+router.post('/like', toggleLike)
 export default router

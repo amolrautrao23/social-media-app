@@ -7,6 +7,8 @@ import Category from '../models/category.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
 import PostImage from '../models/postImage.model.js';
+import Like from '../models/like.model.js';
+import { Sequelize } from 'sequelize';
 
 export const addPost = async (req, res) => {
   try {
@@ -96,8 +98,15 @@ export const getAllPosts = async (req, res) => {
           model: PostImage,
           attributes: ['imagePath'],
         },
+        {
+          model: User,
+          as: 'LikedUsers',
+          attributes: ['id', 'name', 'profilePic'],
+          through: { attributes: [] },
+        },
       ],
     });
+
     return sendResponse(res, 200, 'All posts fetched successfully', posts);
   } catch (error) {
     console.error('Error fetching posts:', error);

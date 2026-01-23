@@ -5,9 +5,10 @@ import bcrypt from 'bcrypt';
 import { deleteUploadedFiles } from '../middlewares/upload.js';
 import jwt from 'jsonwebtoken';
 import { getRelativePath } from '../utils/helper.js';
+import { join } from 'path';
 export const registerUser = async (req, res) => {
   try {
-    const { name, username, password, email, city, website } = req.body;
+    const { name, username, password, email, city, website, role = 0 } = req.body;
     //check if use is already exist
     const user = await User.findOne({ where: { [Op.or]: [{ email }, { username }] } });
     if (user) {
@@ -21,6 +22,16 @@ export const registerUser = async (req, res) => {
       deleteUploadedFiles(req.files);
       return sendError(res, 401, 'All fields are required!');
     }
+    // convert role to integer
+    const roleInt = parseInt(role);
+    if (roleInt && roleInt === 1) {
+      deleteUploadedFiles(req.files);
+      return sendError(res, 403, 'Cannot assign Super Admin role!');
+    }
+    if (roleInt && roleInt > 3) {
+      deleteUploadedFiles(req.files);
+      return sendError(res, 403, 'Invalid role specified!');
+    }
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -32,12 +43,12 @@ export const registerUser = async (req, res) => {
       email,
       city,
       website,
+      role: roleInt,
       profilePic: profilePicPath,
       coverPic: coverPicPath,
     });
     const userData = newUser.get({ plain: true });
     const { password: _, ...withoutPassword } = userData;
-    console.log('new user', userData);
     sendResponse(res, 201, 'User created Successfully!', withoutPassword);
   } catch (err) {
     console.error(err);
@@ -49,7 +60,7 @@ export const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
     //check user is exist or not
-    const existingUser = await User.findOne({ where: { [Op.or]: [{ email:username }, { username }] } });
+    const existingUser = await User.findOne({ where: { [Op.or]: [{ email: username }, { username }] } });
     if (!existingUser) return sendError(res, 404, 'User not found with is email or username!');
 
     //if exist check password is correct
@@ -97,7 +108,7 @@ export const getMe = async (req, res) => {
     if (!userId) return sendError(res, 401, 'Not authenticated');
 
     const user = await User.findByPk(userId, {
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password'] },
     });
     if (!user) return sendError(res, 404, 'User not found');
 
@@ -105,5 +116,77 @@ export const getMe = async (req, res) => {
   } catch (err) {
     console.error(err);
     return sendError(res, 500, err?.message);
+  }
+};
+export const getUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      attributes: { exclude: ['password'] },
+    });
+    return sendResponse(res, 200, 'Users fetched successfully', users);
+  } catch (err) {
+    console.error(err);
+    return sendError(res, 500, err?.message);
+  }
+};
+
+export const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { name, username, password, email, city, website, role = 0 } = req.body;
+    const user = await User.findByPk(userId);
+    if (!user) return sendError(res, 404, 'User not found');
+    if (name) user.name = name;
+    if (username) user.username = username;
+    if (email) user.email = email;
+    if (city) user.city = city;
+
+    if (role && parseInt(role) === 1) {
+      return sendError(res, 403, 'Cannot assign Super Admin role!');
+    }
+    if (role && parseInt(role) > 3) {
+      return sendError(res, 403, 'Invalid role specified!');
+    }
+    if (role) user.role = parseInt(role);
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
+    // Handle profilePic update
+    if (req?.files?.profilePic?.length) {
+      if (user.profilePic) {
+        deleteUploadedFiles([{ path: join(process.cwd(), user.profilePic) }]);
+      }
+      user.profilePic = getRelativePath(req.files.profilePic[0].path);
+    }
+    await user.save();
+    const userData = user.get();
+    const { password: _, ...withoutPassword } = userData;
+    return sendResponse(res, 200, 'User updated successfully', withoutPassword);
+  } catch (error) {
+    console.error(error);
+    return sendError(res, 500, error?.message);
+  }
+};
+export const deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return sendError(res, 404, 'User not found');
+    }
+    // Delete profilePic and coverPic files if exist
+    if (user.profilePic) {
+      deleteUploadedFiles([{ path: join(process.cwd(), user.profilePic) }]);
+    }
+    if (user.coverPic) {
+      deleteUploadedFiles([{ path: join(process.cwd(), user.coverPic) }]);
+    }
+    await user.destroy();
+    return sendResponse(res, 200, 'User deleted successfully');
+  } catch (error) {
+    console.error(error);
+    return sendError(res, 500, error?.message);
   }
 };
