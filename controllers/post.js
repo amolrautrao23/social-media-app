@@ -5,10 +5,8 @@ import { getRelativePath } from '../utils/helper.js';
 import User from '../models/user.model.js';
 import Category from '../models/category.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
-
 import PostImage from '../models/postImage.model.js';
-import Like from '../models/like.model.js';
-import { Sequelize } from 'sequelize';
+import { join } from 'path';
 
 export const addPost = async (req, res) => {
   try {
